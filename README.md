@@ -228,7 +228,8 @@ labels e põe na `Planning queue`. Uma issue criada à mão entra quando você a
 na própria issue, e o vídeo da rodada aprovada. Confira, teste à mão se quiser, e lance.
 
 **Decidir.** Em `Needs maintainer` ficam as issues em que a esteira precisa de você: uma escolha de
-produto, um acesso que só você tem, ou três tentativas que não deram certo. O comentário
+produto, um acesso que só você tem, três tentativas que não deram certo, ou uma issue que o QA
+reprovou mais de `max_qa_failures` vezes (a esteira não deixa dev e QA ficarem num vaivém sem fim). O comentário
 `<!-- pipeline:human -->` explica o que falta e recomenda uma saída. Responda na issue e devolva-a
 para a fila da etapa.
 
@@ -287,6 +288,7 @@ config inválido é recusado (a passada é pulada) em vez de usado pela metade.
 |---|---|---|
 | `stages.<etapa>.max` | `1` | vagas por etapa (agentes em paralelo) |
 | `max_workers` | `4` | teto de agentes trabalhando ao mesmo tempo, somando as etapas |
+| `max_qa_failures` | `3` | reprovações do QA que voltam para o dev; a seguinte vai para `Needs maintainer` |
 | `min_free_ram_gb` | `4` | abaixo disso, as etapas pesadas (dev, review, qa) não recebem trabalho |
 | `loops.dispatch_seconds` | `900` | intervalo das filas (15 min) |
 | `loops.supervise_seconds` | `120` | intervalo do supervisor |

@@ -175,9 +175,11 @@ cd "$MAIN" && git worktree remove --force "$(git -C "$WT" rev-parse --show-tople
 ```
 
 **Com bug** (algum CT `FALHOU`, ou obrigatório `BLOQUEADO` por defeito):
-- Conte as rodadas `<!-- pipeline:qa -->` com FAILED. Na 3ª: `worker.py human qa <N> <arquivo>`, com
-  o histórico.
-- Senão: `$BIN/worker.py end qa <N> --to "Dev queue"`.
+- Sempre `$BIN/worker.py end qa <N> --to "Dev queue"`, depois de publicar o relatório FAILED.
+- **Trava contra loop QA ↔ dev:** o QA pode reprovar a issue até `max_qa_failures` vezes (padrão 3).
+  Na reprovação seguinte, o próprio `worker.py end` conta os relatórios FAILED da issue, comenta e
+  move para **Needs maintainer** em vez da Dev queue. Não conte nem desvie à mão. Devolução por
+  conflito com a base (relatório PASSED) não conta.
 
 **Sem bug**:
 

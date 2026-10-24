@@ -12,12 +12,16 @@
       down what the job raised (cleanup.sh) and gives the seat back: the tab is
       labelled `vaga` again. The Claude session stays open; the dispatcher
       /clears it before the next job.
+      A QA job sending the issue back to dev is diverted to "Needs maintainer"
+      once the issue holds more than `max_qa_failures` FAILED QA reports, so
+      dev and QA cannot bounce it back and forth forever.
 
   worker.py human <stage> <issue> <comment-file>
       Posts the comment, moves the issue to "Needs maintainer" and gives the seat back.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -67,9 +71,47 @@ def begin(stage_key, n):
                       "repo": c["repo"], "base_branch": c.get("base_branch", "main")}))
 
 
+QA_FAILED_RE = re.compile(r"^## QA report\b.*\bFAILED\b", re.M)
+
+
+def qa_failures(c, n):
+    """FAILED QA reports on the issue, counting only the pipeline's own comments
+    (written by a maintainer or by the account the pipeline runs as)."""
+    me = subprocess.run(["gh", "api", "user", "--jq", ".login"], capture_output=True, text=True).stdout.strip()
+    trusted = set(c.get("maintainers", [])) | ({me} if me else set())
+    out = subprocess.run(["gh", "issue", "view", str(n), "--repo", c["repo"], "--json", "comments",
+                          "--jq", ".comments[] | {author: .author.login, body: .body}"],
+                         capture_output=True, text=True, check=True).stdout
+    count = 0
+    for line in out.splitlines():
+        cm = json.loads(line)
+        if (cm["author"] in trusted and "<!-- pipeline:qa -->" in cm["body"]
+                and QA_FAILED_RE.search(cm["body"])):
+            count += 1
+    return count
+
+
+def qa_loop_guard(c, stage_key, n, to):
+    """Divert a QA rejection past the limit to Needs maintainer. Returns the destination."""
+    limit = c.get("max_qa_failures")
+    if stage_key != "qa" or not limit or to != c["stages"]["dev"]["queue"]:
+        return to
+    failures = qa_failures(c, n)
+    if failures <= limit:
+        return to
+    subprocess.run(["gh", "issue", "comment", str(n), "--repo", c["repo"], "--body",
+                    f"<!-- pipeline:human -->\nQA has now failed this issue {failures} times "
+                    f"(limit: {limit} returns to development). Instead of another round, it goes "
+                    "to **Needs maintainer**: the QA reports above hold the history of what kept "
+                    "failing."], capture_output=True)
+    lib.log(f"#{n} qa: {failures} FAILED rounds > {limit} -> Needs maintainer")
+    return "Needs maintainer"
+
+
 def end(stage_key, n, to=None):
     c = lib.cfg()
     stage = c["stages"][stage_key]
+    to = qa_loop_guard(c, stage_key, n, to)
     board("move", str(n), to or stage["next"])
     drop_claim(stage_key, n)
     try:

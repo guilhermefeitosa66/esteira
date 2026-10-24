@@ -60,6 +60,7 @@
   },
   "stale_minutes": 20,
   "max_attempts": 3,
+  "max_qa_failures": 3,
   "evidence_repo": null,
   "evidence_checkout": "",
   "worktrees_dir": "",

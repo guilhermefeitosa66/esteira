@@ -24,6 +24,8 @@ abre); dentro de uma worktree, use o caminho absoluto do checkout principal.
   - há risco de perda de dados, de segurança ou de licença que você não consegue eliminar;
   - falta um insumo que só o mantenedor tem: credencial, conta, hardware, acesso;
   - a mesma etapa já falhou `max_attempts` vezes.
+  - o QA já reprovou a issue `max_qa_failures` vezes e reprova de novo (o `worker.py end` faz
+    esse desvio sozinho).
 
   Fora disso, escolha a opção mais conservadora e coerente com o projeto, registre a decisão no
   comentário da etapa e siga. Se o mantenedor discordar, ele vê na homologação.
