@@ -58,6 +58,7 @@ def begin(stage_key, n):
                        capture_output=True)
         board("clear", str(n))
         drop_claim(stage_key, n)
+        lib.wake(stage_key)
         print(json.dumps({"go": False, "reason": snap["reason"] + "; sent back to triage"}))
         sys.exit(3)
     if current != stage["active"]:
@@ -67,7 +68,8 @@ def begin(stage_key, n):
 
 
 def end(stage_key, n, to=None):
-    stage = lib.cfg()["stages"][stage_key]
+    c = lib.cfg()
+    stage = c["stages"][stage_key]
     board("move", str(n), to or stage["next"])
     drop_claim(stage_key, n)
     try:
@@ -75,6 +77,8 @@ def end(stage_key, n, to=None):
     except Exception as e:  # a stuck teardown must not keep the issue claimed
         print(f"cleanup failed: {e}", file=sys.stderr)
     give_seat_back()
+    # This stage has a free seat; the stage after it may have a new item.
+    lib.wake(stage_key, lib.stage_for_queue(c, to or stage["next"]))
     lib.log(f"#{n} {stage_key}: done -> {to or stage['next']}", quiet=True)
     print(json.dumps({"issue": n, "moved_to": to or stage["next"], "seat": "released"}))
 

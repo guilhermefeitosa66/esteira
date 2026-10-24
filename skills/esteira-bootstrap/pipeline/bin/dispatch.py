@@ -2,8 +2,12 @@
 """Queue dispatcher: hands queued issues to the stage's fixed seats in Herdr.
 
   dispatch.py <stage>            one pass (plan | dev | review | qa)
-  dispatch.py <stage> --loop N   one pass every N seconds, forever (no LLM tokens)
+  dispatch.py <stage> --loop N   one pass every N seconds, forever (no LLM tokens), and
+                                 a pass within seconds whenever `wake-<stage>` is touched
+                                 (lib.wake: a job ended, a seat was recycled)
   dispatch.py seats <stage>      make sure the stage's seats exist (tabs 2..max+1, Claude open)
+  dispatch.py scale <stage> N    set the stage's seat count (config `max`) and open/close seats;
+                                 a busy seat over the count closes once its job ends
 
 One pass, under the machine-wide pipeline lock:
 
@@ -18,6 +22,7 @@ One pass, under the machine-wide pipeline lock:
 
 The space is the one named in `stages.<stage>.space`, wherever this runs.
 """
+import json
 import os
 import subprocess
 import sys
@@ -68,7 +73,43 @@ def ensure_seats(stage_key, c):
             lib.herdr("agent", "rename", s["pane"], seat_name(stage_key, k), check=False)
             used.add(seat_name(stage_key, k))
             lib.log(f"{stage_key}: restarted Claude in seat {s['tab']} as {seat_name(stage_key, k)}")
+    # More seats than `max` (it was scaled down): close free ones, last tab first.
+    # A busy one finishes its job first; its `worker.py end` wakes the loop and
+    # the next pass closes it.
+    ws, seats = lib.seats(stage_key, c)
+    extra = len(seats) - stage["max"]
+    if extra > 0:
+        idle = [s for s in free_seats(stage_key, seats, claims) if s["label"] == lib.SEAT_LABEL]
+        for s in sorted(idle, key=lambda s: -s["number"])[:extra]:
+            lib.herdr("tab", "close", s["tab"], check=False)
+            lib.log(f"{stage_key}: closed seat {(s['agent'] or {}).get('name') or s['tab']} (scaled down)")
     return lib.seats(stage_key, c)[1]
+
+
+def scale(stage_key, n):
+    """Set `stages.<stage>.max` to n and open or close seats to match."""
+    c = lib.cfg()
+    if stage_key not in c["stages"]:
+        sys.exit(f"unknown stage {stage_key}; one of {', '.join(c['stages'])}")
+    if not 1 <= n <= 9:
+        sys.exit("seats per stage: 1 to 9")
+    with lib.pipeline_lock():
+        raw = json.loads(lib.CONFIG.read_text())
+        before = raw["stages"][stage_key]["max"]
+        raw["stages"][stage_key]["max"] = n
+        tmp = lib.CONFIG.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(raw, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, lib.CONFIG)
+        lib.log(f"{stage_key}: scaled {before} -> {n} seats")
+        seats = ensure_seats(stage_key, lib.cfg())
+    lib.wake(stage_key)
+    c = lib.cfg()
+    total = sum(st["max"] for st in c["stages"].values())
+    print(f"{stage_key}: {before} -> {n} seats; {len(seats)} open now"
+          + (f" ({len(seats) - n} busy, closing when their job ends)" if len(seats) > n else ""))
+    if total > c["max_workers"]:
+        print(f"warning: stages add up to {total} seats but max_workers is {c['max_workers']}; "
+              f"the pipeline-wide cap wins")
 
 
 def reconcile(stage_key, c):
@@ -167,6 +208,12 @@ def one_pass(stage_key):
 def main(argv):
     if not argv:
         sys.exit(__doc__)
+    if argv[0] == "scale":
+        lib.require_herdr()
+        if len(argv) != 3 or not argv[2].isdigit():
+            sys.exit("usage: dispatch.py scale <stage> <seats>")
+        scale(argv[1], int(argv[2]))
+        return
     if argv[0] == "seats":
         lib.require_herdr()
         with lib.pipeline_lock():
@@ -179,11 +226,13 @@ def main(argv):
     if "--loop" in argv:
         every = int(argv[argv.index("--loop") + 1])
         while True:
+            started = time.time()
             try:
                 one_pass(stage_key)
             except Exception as e:
                 lib.log(f"{stage_key}: pass failed: {e}")
-            time.sleep(every)
+            if lib.wait_wake(stage_key, every, started):
+                lib.log(f"{stage_key}: woken (a seat freed up or the queue got an item)", quiet=True)
     one_pass(stage_key)
 
 

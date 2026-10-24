@@ -78,6 +78,40 @@ def log(msg, quiet=False):
         f.write(line + "\n")
 
 
+# --- Wake-ups ------------------------------------------------------------------
+# A stage's loop sleeps `loops.dispatch_seconds` between passes, but anything
+# that frees one of its seats or drops an item in its queue touches
+# `wake-<stage>` and the loop runs a pass within seconds. Watching the file is
+# local only: GitHub is asked once per pass, never while waiting.
+
+def wake(*stage_keys):
+    for s in stage_keys:
+        if s:
+            (state_dir() / f"wake-{s}").touch()
+
+
+def stage_for_queue(c, status):
+    """The stage whose queue column is `status`, if any."""
+    return next((k for k, st in c["stages"].items() if st["queue"] == status), None)
+
+
+def wait_wake(stage_key, seconds, since, poll=3, settle=5):
+    """Sleep up to `seconds`, returning early once `wake-<stage>` is newer than
+    `since`. `settle` more seconds are waited after a wake so that several jobs
+    ending together cost one pass. Returns True when woken."""
+    path = state_dir() / f"wake-{stage_key}"
+    deadline = time.time() + seconds
+    while time.time() < deadline:
+        try:
+            if path.stat().st_mtime > since:
+                time.sleep(settle)
+                return True
+        except FileNotFoundError:
+            pass
+        time.sleep(min(poll, max(0, deadline - time.time())))
+    return False
+
+
 @contextmanager
 def pipeline_lock():
     """One dispatcher/supervisor pass at a time, machine-wide."""

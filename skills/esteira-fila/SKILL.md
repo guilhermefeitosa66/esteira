@@ -19,13 +19,15 @@ argumento, rode as quatro, uma depois da outra.
 ```
 
 Não rode em `/loop`: o loop é o `dispatch.py <etapa> --loop` na aba "monitor" do space da etapa (o
-`esteira-up` sobe), e o supervisor cuida das vagas travadas.
+`esteira-up` sobe), e o supervisor cuida das vagas travadas. O loop olha o board a cada
+`loops.dispatch_seconds`, mas acorda em segundos quando um trabalho termina (`worker.py end`
+toca `wake-<etapa>`), então esta skill só é necessária para forçar uma passada.
 
 O que uma passada faz (sob uma trava compartilhada com as outras filas e o supervisor):
 
 1. **Reconcilia.** Claim cuja issue já saiu da coluna ativa é descartado; issue na coluna ativa sem
    ninguém trabalhando volta para a fila.
-2. **Vagas.** O space tem a aba 1 (monitor) e `stages.<etapa>.max` vagas: abas com um Claude
+2. **Vagas.** O space tem a aba 1 (monitor) e `stages.<etapa>.max` vagas (`/esteira-scale` muda): abas com um Claude
    permanente. Falta vaga, ela abre; o Claude da vaga caiu, ela sobe outro.
 3. **Memória.** Etapa pesada não despacha com menos de `min_free_ram_gb` livres.
 4. **Despacha**, enquanto houver vaga livre (ociosa e sem tarefa em segundo plano): confere o

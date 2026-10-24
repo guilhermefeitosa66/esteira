@@ -56,10 +56,16 @@ spaces, abas e um socket para controlar tudo de fora. A esteira cria um space po
 | `supervisor` | o supervisor (`supervise.py`), sem LLM | — |
 | `monitor-issues`, `monitor-pr` | triagem e monitor de PRs (só em projeto público) | — |
 
-**Vagas fixas.** Cada etapa tem um número fixo de vagas (1 por padrão). Uma vaga é uma aba com um
-Claude que nunca é fechado: entre um trabalho e outro ele recebe `/clear`. O loop da fila olha o
-board a cada 15 minutos; havendo issue na fila e vaga livre, ele move a issue para a coluna ativa,
-limpa a vaga e manda a skill da etapa (`/esteira-dev 42`), conferindo que o turno começou.
+**Vagas fixas.** Cada etapa tem um número fixo de vagas (1 por padrão; `/esteira-scale qa 3` muda).
+Uma vaga é uma aba com um Claude que nunca é fechado: entre um trabalho e outro ele recebe `/clear`.
+Havendo issue na fila e vaga livre, o loop da fila move a issue para a coluna ativa, limpa a vaga e
+manda a skill da etapa (`/esteira-dev 42`), conferindo que o turno começou.
+
+**O loop acorda quando um trabalho termina.** Sem nada acontecendo, o loop olha o board a cada 15
+minutos. Mas quando um trabalho termina, o `worker.py end` avisa localmente (um arquivo
+`wake-<etapa>` no diretório de estado) o loop da própria etapa, que ganhou uma vaga livre, e o da
+etapa seguinte, que ganhou um item na fila. O loop roda a passada em segundos, sem esperar os 15
+minutos. Esperar pelo aviso não consulta o GitHub; vários fins juntos viram uma passada só.
 
 **O trabalhador termina sozinho.** Cada skill de etapa trabalha numa worktree própria (o seu
 checkout principal nunca é tocado), comenta na issue o que fez, derruba tudo o que subiu e chama
@@ -214,6 +220,7 @@ labels e põe na `Planning queue`. Uma issue criada à mão entra quando você a
 |---|---|
 | `/esteira-status` | filas, o que cada vaga está fazendo, travas, RAM, loops de pé |
 | `/esteira-fila dev` | uma passada na hora numa fila, sem esperar os 15 minutos |
+| `/esteira-scale qa 3` | quantos trabalhos simultâneos a fila roda (abre ou fecha vagas) |
 | `/esteira-up` | sobe tudo de novo (depois de um reinício, por exemplo); não duplica nada |
 | `/esteira-limpar-abas` | fecha abas ociosas que ficaram para trás nos spaces |
 
@@ -363,7 +370,8 @@ skills/                                     → .claude/skills/ do projeto
         start-all.sh, run-loop.sh, status.py  subir tudo, loop de sessão nova, painel
   esteira-criar-issue                       a porta de entrada: pedido → issue na Planning queue
   esteira-planejamento, esteira-dev, esteira-revisao, esteira-qa       as etapas
-  esteira-fila, esteira-up, esteira-status, esteira-limpar-abas        operação
+  esteira-fila, esteira-scale, esteira-up, esteira-status,
+  esteira-limpar-abas                       operação
   esteira-triagem, esteira-monitor-prs      monitores de projeto público
 ```
 

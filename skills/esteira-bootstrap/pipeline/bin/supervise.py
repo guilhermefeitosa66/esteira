@@ -66,6 +66,7 @@ def recycle(c, claims, key, why, commented=False):
     if cl.get("tab"):
         lib.herdr("tab", "rename", cl["tab"], lib.SEAT_LABEL, check=False)
     del claims[key]
+    lib.wake(stage_key)
 
 
 def supervise_claim(c, claims, key, seat_by_pane, track, now):
