@@ -105,6 +105,21 @@ A esteira é um conjunto de skills do Claude Code. Instalar é colocar essas ski
 `.claude/skills/` do projeto em que você trabalha; daí em diante, a skill `/esteira-bootstrap`
 configura o resto.
 
+### O jeito mais fácil: peça ao Claude
+
+Abra o Claude Code na pasta do seu projeto (de preferência já dentro do Herdr) e mande:
+
+```text
+Instale a esteira neste projeto: clone https://github.com/guilhermefeitosa66/esteira numa pasta
+temporária, rode o install.sh dela a partir desta pasta (ele copia as skills esteira-* para
+.claude/skills), apague o clone e me diga o que foi instalado. Depois, chame /esteira-bootstrap.
+```
+
+Se as skills novas não aparecerem logo para o `/esteira-bootstrap`, saia e abra o Claude de novo
+na mesma pasta: ele lê o `.claude/skills/` ao iniciar.
+
+### Passo a passo
+
 **1. Copie as skills para o projeto.** Na pasta onde você abre o Claude Code para trabalhar:
 
 ```bash
