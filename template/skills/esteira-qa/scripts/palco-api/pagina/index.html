@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Palco de API</title>
+  <link rel="stylesheet" href="palco.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="titulo">
+      <span class="marca">API</span>
+      <div>
+        <h1 id="titulo"></h1>
+        <p id="descricao"></p>
+      </div>
+    </div>
+    <div class="ambiente" id="ambiente"></div>
+  </header>
+
+  <nav class="etapas">
+    <div class="grupo" id="grupo" hidden></div>
+    <ol id="etapas"></ol>
+  </nav>
+
+  <div class="nota" id="nota" hidden></div>
+
+  <main class="colunas">
+    <section class="coluna" id="col-esq">
+      <div class="cabeca">
+        <h2 id="esq-titulo">Request</h2>
+        <button id="enviar" type="button" disabled>
+          <span class="rotulo">Enviar</span>
+          <kbd>⏎</kbd>
+        </button>
+      </div>
+      <div class="corpo" id="esq"></div>
+    </section>
+    <section class="coluna" id="col-dir">
+      <div class="cabeca">
+        <h2 id="dir-titulo">Response</h2>
+        <div class="medidas" id="medidas"></div>
+      </div>
+      <div class="corpo" id="dir">
+        <div class="vazio" id="dir-vazio">Envie a request para ver a resposta</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="palco.js"></script>
+</body>
+</html>

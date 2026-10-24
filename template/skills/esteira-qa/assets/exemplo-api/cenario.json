@@ -1,0 +1,30 @@
+{
+  "titulo": "Criar tarefa e ver o worker concluir",
+  "descricao": "A API cria a tarefa como PENDENTE; o worker a conclui em segundo plano.",
+  "ambiente": "local",
+  "variaveis": { "API": "{{ALVO}}" },
+  "segredos": ["SENHA_ALVO", "TOKEN"],
+  "fontes_log": {
+    "worker": { "descricao": "log do worker do alvo", "arquivo": "{{ALVO_LOG}}" }
+  },
+  "grupos": {
+    "CT-01": { "titulo": "Tarefa criada e concluída", "esperado": "201 com status PENDENTE e, em seguida, CONCLUIDA no log (critério 1 da issue)" }
+  },
+  "etapas": [
+    { "id": "login", "rotulo": "Login", "grupo": "CT-01",
+      "request": { "method": "POST", "url": "{{API}}/api/login", "body": { "email": "qa@example.com", "password": "{{SENHA_ALVO}}" } },
+      "capturar": { "TOKEN": "body.token" },
+      "esperado": { "status": 200, "existe": ["body.token"] } },
+    { "id": "criar", "rotulo": "Criar tarefa", "grupo": "CT-01", "nota": "Esperado: 201 e status PENDENTE (critério 1)",
+      "request": { "method": "POST", "url": "{{API}}/api/tarefas", "headers": { "Authorization": "Token {{TOKEN}}" },
+                   "body": { "titulo": "Revisar o relatório" } },
+      "capturar": { "TAREFA": "body.id" },
+      "esperado": { "status": 201, "campos": { "body.status": "PENDENTE" } } },
+    { "id": "worker", "rotulo": "Worker conclui", "grupo": "CT-01", "tipo": "log", "fonte": "worker",
+      "filtro": "{{TAREFA}}", "esperar": { "regex": "CONCLUIDA", "timeout_s": 20 }, "destacar": "recebida|CONCLUIDA",
+      "esperado": { "contem": "CONCLUIDA" } },
+    { "id": "consultar", "rotulo": "Consultar", "grupo": "CT-01", "nota": "Esperado: 200 e status CONCLUIDA",
+      "request": { "method": "GET", "url": "{{API}}/api/tarefas/{{TAREFA}}", "headers": { "Authorization": "Token {{TOKEN}}" } },
+      "esperado": { "status": 200, "campos": { "body.status": "CONCLUIDA" } } }
+  ]
+}

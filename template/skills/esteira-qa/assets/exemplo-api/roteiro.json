@@ -1,0 +1,13 @@
+{
+  "titulo": "QA — criar tarefa e ver o worker concluir",
+  "pronuncia": { "CT-01": "C T zero um", "API": "A P I" },
+  "cenas": [
+    { "id": "abertura", "fala": "Teste de API da criação de tarefas. Ambiente local, com o worker rodando. São quatro etapas, mostradas no topo." },
+    { "id": "login", "fala": "Primeiro, o login. A requisição leva o e-mail e a senha de teste, que aparece mascarada. A resposta é duzentos, com o token." },
+    { "id": "criar-req", "fala": "Agora criamos a tarefa. O corpo da requisição leva só o título. Pelo critério um da issue, o esperado é o status duzentos e um, com a tarefa pendente." },
+    { "id": "criar-res", "fala": "A resposta veio duzentos e um, e o status é pendente, como esperado." },
+    { "id": "worker", "fala": "Em seguida, o log do worker, filtrado por essa tarefa. A tarefa foi recebida... e, pouco depois, concluída." },
+    { "id": "consultar", "fala": "Por fim, consultamos a tarefa. Ela voltou com o status concluída." },
+    { "id": "fechamento", "fala": "Resultado: quatro de quatro etapas como esperado. O critério um está atendido." }
+  ]
+}

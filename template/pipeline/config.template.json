@@ -1,0 +1,52 @@
+{
+  "repo": "",
+  "owner": "",
+  "owner_type": "user",
+  "visibility": "private",
+  "monitors": false,
+  "base_branch": "main",
+  "language": "en",
+  "merge_on_qa": true,
+  "maintainers": [],
+  "bot_account": "",
+  "project_number": 0,
+  "project_id": "",
+  "status_field_name": "Status",
+  "status_field_id": "",
+  "status_options": {},
+  "quarantine": null,
+  "agent_prefix": "es",
+  "claude_command": "claude --dangerously-skip-permissions",
+  "git_ssh_command": "",
+  "trusted_domains": [],
+  "max_workers": 4,
+  "stages": {
+    "plan": {"queue": "Planning queue", "active": "Planning", "skill": "esteira-planejamento", "next": "Dev queue", "max": 1, "space": "plan", "heavy": false},
+    "dev": {"queue": "Dev queue", "active": "In development", "skill": "esteira-dev", "next": "Review queue", "max": 1, "space": "dev", "heavy": true},
+    "review": {"queue": "Review queue", "active": "In review", "skill": "esteira-revisao", "next": "QA queue", "max": 1, "space": "review", "heavy": true},
+    "qa": {"queue": "QA queue", "active": "In QA", "skill": "esteira-qa", "next": "Ready for release", "max": 1, "space": "qa", "heavy": true}
+  },
+  "stale_minutes": 20,
+  "max_attempts": 3,
+  "evidence_repo": null,
+  "evidence_checkout": "",
+  "worktrees_dir": "",
+  "state_dir": "",
+  "min_free_ram_gb": 4,
+  "timeouts": {
+    "prompt_start_seconds": 60,
+    "idle_nudge_minutes": 30,
+    "idle_give_up_minutes": 20,
+    "blocked_minutes": 10,
+    "lock_owner_stale_minutes": 90,
+    "leftover_task_minutes": 10
+  },
+  "loops": {
+    "dispatch_seconds": 900,
+    "supervise_seconds": 120,
+    "triage_seconds": 3600,
+    "prs_seconds": 3600
+  },
+  "monitor_spaces": {"triage": "monitor-issues", "prs": "monitor-pr", "supervisor": "supervisor"},
+  "manual_spaces": ["homolog", "release"]
+}
