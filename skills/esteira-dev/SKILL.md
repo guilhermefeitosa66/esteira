@@ -93,7 +93,7 @@ plano, estado do CI. Depois **derrube tudo o que você levantou**:
 2. `$BIN/cleanup.sh dev <N>` (processos na worktree, containers da issue, gancho do projeto).
 
 ```bash
-cd "$MAIN" && git worktree remove --force "$WT"
+cd "$MAIN" && git worktree remove --force "$(git -C "$WT" rev-parse --show-toplevel)"
 $BIN/worker.py end dev <N>           # → Review queue e devolve a vaga (o Claude fica aberto)
 ```
 

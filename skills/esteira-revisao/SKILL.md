@@ -71,7 +71,7 @@ corrigido, o que foi descartado e por quê. Depois derrube o que subiu (`TaskSto
 em segundo plano, `$BIN/cleanup.sh review <N>`) e:
 
 ```bash
-cd "$MAIN" && git worktree remove --force "$WT"
+cd "$MAIN" && git worktree remove --force "$(git -C "$WT" rev-parse --show-toplevel)"
 $BIN/worker.py end review <N>        # → QA queue e devolve a vaga (o Claude fica aberto)
 ```
 

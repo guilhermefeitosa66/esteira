@@ -171,7 +171,7 @@ Antes de remover a worktree, **derrube tudo o que você levantou**: o palco
 que subiu, suas tarefas em segundo plano (`TaskStop`) e `$BIN/cleanup.sh qa <N>`. Depois:
 
 ```bash
-cd "$MAIN" && git worktree remove --force "$WT"
+cd "$MAIN" && git worktree remove --force "$(git -C "$WT" rev-parse --show-toplevel)"
 ```
 
 **Com bug** (algum CT `FALHOU`, ou obrigatório `BLOQUEADO` por defeito):

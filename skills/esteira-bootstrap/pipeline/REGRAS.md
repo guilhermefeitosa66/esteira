@@ -6,8 +6,13 @@ Ele vale junto com as instruções do próprio projeto (`CLAUDE.md`, `AGENTS.md`
 `README.md`). Quando os dois conflitam, vale o projeto, exceto no que é específico da esteira.
 
 Configuração: `.claude/esteira/config.json` (abaixo, "o config"). Scripts: `.claude/esteira/bin/`
-(abaixo, `bin/`). Os caminhos dos scripts são relativos à raiz do projeto; dentro de uma worktree,
-use o caminho absoluto do checkout principal (a worktree não tem `.claude/esteira/`).
+(abaixo, `bin/`). Os caminhos dos scripts são relativos à pasta do projeto (onde o Claude da vaga
+abre); dentro de uma worktree, use o caminho absoluto do checkout principal.
+
+**Monorepo**: se o config tiver `subdir`, o projeto é essa subpasta do repositório. O
+`worktree.sh` já devolve o caminho da subpasta dentro da worktree; o trabalho fica restrito a ela
+(mudança fora dela só quando o plano disser por quê), e a worktree é removida pela raiz
+(`git -C "$WT" rev-parse --show-toplevel`).
 
 ## 1. Autonomia
 

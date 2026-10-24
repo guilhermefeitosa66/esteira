@@ -7,6 +7,16 @@ mostrando que funciona) e deixa pronto para você homologar. Cada etapa tem a su
 GitHub e um agente dedicado no [Herdr](https://github.com/herdrdev/herdr); loops em shell, que não
 gastam token, entregam a próxima issue para quem estiver livre.
 
+> **Só Linux.** A esteira foi feita e testada no Linux e depende dele: os scripts usam `/proc`,
+> `flock` e X11 (os displays próprios onde o QA grava os testes), e o Herdr é a base de tudo. macOS
+> e Windows (mesmo com WSL) não foram testados e, do jeito que está, não devem funcionar.
+>
+> **Usa outro sistema?** As skills e os scripts são texto legível e o Claude Code os entende bem:
+> depois de copiar as skills para o projeto, peça a ele para adaptar ao seu contexto. Por exemplo:
+> *"adapte as skills `esteira-*` e os scripts em `.claude/skills/esteira-bootstrap/pipeline/bin/`
+> para o macOS: troque o `flock`, o `/proc` e o Xephyr por equivalentes daqui"*. O mesmo vale para
+> outro multiplexador no lugar do Herdr, outro jeito de testar ou outras colunas no board.
+
 ```
  Planning queue ─► plan ─► Dev queue ─► dev ─► Review queue ─► review ─► QA queue ─► qa ─► Ready for release
                     │                    │                       │                    │          (você homologa)
@@ -76,7 +86,8 @@ A esteira em si precisa só disto:
 | [GitHub CLI](https://cli.github.com) (`gh`) | board, issues, PRs | `sudo apt install gh` / `sudo dnf install gh`, depois `gh auth login` e `gh auth refresh -s project` |
 | git, Python 3.10+, `flock` | scripts | já vêm na maioria das distros Linux (`flock` é do `util-linux`) |
 
-**Linux.** Os scripts usam `/proc`, `flock` e X11; a esteira foi feita e testada em Linux.
+**Linux.** A esteira foi feita e testada no Linux (veja o aviso no topo). Distros testadas: Ubuntu
+e derivadas; qualquer distro com as ferramentas acima deve servir.
 
 **O ambiente do seu projeto é com você.** Linguagem, banco, Docker, SDKs: os agentes rodam e testam
 o projeto do jeito que o README e o `CLAUDE.md` dele explicam, com o que já está instalado na
@@ -90,17 +101,43 @@ normalmente, só que sem vídeo.
 
 ## Instalação
 
-**1. Clone este repositório e deixe a skill de bootstrap disponível:**
+A esteira é um conjunto de skills do Claude Code. Instalar é colocar essas skills no
+`.claude/skills/` do projeto em que você trabalha; daí em diante, a skill `/esteira-bootstrap`
+configura o resto.
+
+**1. Copie as skills para o projeto.** Na pasta onde você abre o Claude Code para trabalhar:
 
 ```bash
-git clone <url deste repositório> ~/esteira
-~/esteira/install.sh
+cd ~/caminho/do/seu-projeto
+d=$(mktemp -d) && git clone -q --depth 1 https://github.com/guilhermefeitosa66/esteira.git "$d" \
+  && "$d/install.sh" && rm -rf "$d"
 ```
 
-O `install.sh` só cria um link de `~/.claude/skills/esteira-bootstrap` para este repositório. Um
-`git pull` aqui atualiza a skill.
+O comando clona a esteira numa pasta temporária, copia as pastas `skills/esteira-*` para
+`.claude/skills/` (criando a pasta se ela ainda não existe) e apaga o clone. Nenhuma outra skill do
+projeto é tocada. Se preferir fazer à mão, é só isto:
 
-**2. Abra o Herdr, entre na pasta do seu projeto e rode o Claude:**
+```bash
+git clone --depth 1 https://github.com/guilhermefeitosa66/esteira.git /tmp/esteira
+mkdir -p .claude/skills && cp -r /tmp/esteira/skills/esteira-* .claude/skills/
+```
+
+**Monorepo?** Copie para o `.claude/skills/` da pasta onde você abre o Claude Code:
+
+- na **subpasta do projeto** (`monorepo/apps/loja/.claude/skills/`), para a esteira cuidar só
+  daquele projeto. Ela registra a subpasta e os agentes trabalham dentro dela;
+- na **raiz do monorepo** (`monorepo/.claude/skills/`), para a esteira cuidar do repositório
+  inteiro.
+
+Cada projeto do monorepo pode ter a sua esteira, com o seu board. Só os nomes dos spaces no Herdr
+precisam ser diferentes (veja [Configuração](#configuração)).
+
+**Versionar ou não?** As skills em `.claude/skills/` podem ir para o git do projeto, se você quiser
+que o time tenha as mesmas. A configuração que o bootstrap gera (`.claude/esteira/`) tem caminhos
+da sua máquina e fica fora do git automaticamente (via `.git/info/exclude`, sem mexer no seu
+`.gitignore`).
+
+**2. Abra o Herdr, entre na pasta do projeto e rode o Claude:**
 
 ```bash
 herdr
@@ -128,8 +165,7 @@ Ele:
      PRs) ou **privado**;
    - se o QA aprovado **já faz o merge** do PR ou se você prefere fazer o merge na homologação;
    - em que **idioma** a esteira escreve no GitHub (inglês ou português);
-3. copia as skills e os scripts para `.claude/` do projeto (fora do git dele, via
-   `.git/info/exclude`);
+3. instala os scripts do pipeline em `.claude/esteira/` (fora do git, via `.git/info/exclude`);
 4. cria ou adota o board, as labels e um repositório de evidências (`<repo>-evidence`, com a mesma
    visibilidade do projeto, onde ficam os vídeos do QA);
 5. cria os spaces no Herdr, abre as vagas e põe os loops para rodar.
@@ -140,8 +176,10 @@ Pronto: a esteira está de pé, esperando a primeira issue.
 > chamado "Esteira", sem apagar nada do seu "Status". A API do GitHub não cria visões, então agrupe a
 > visão do board por esse campo na interface (Board → menu da visão → Group by: Esteira).
 
-**Atualizar.** `git pull` neste repositório e `/esteira-bootstrap` de novo no projeto: os arquivos são
-reinstalados e o `config.json` e os ganchos (`hooks/`) são preservados.
+**Atualizar.** Rode o mesmo comando do passo 1 na pasta do projeto. As skills `esteira-*` são
+trocadas pelas novas e, se a esteira já estiver configurada, os scripts de `.claude/esteira/`
+também; o `config.json` e os ganchos (`hooks/`) ficam. Os loops que já estão rodando pegam o código
+novo quando são reiniciados: feche a aba 1 dos spaces e rode `/esteira-up`.
 
 ## O dia a dia
 
@@ -195,7 +233,7 @@ sobre o **palco de API**: uma página local de duas colunas, com a requisição 
 headers, body) e a resposta à direita (status, tempo, body), mais os selos "esperado × obtido" e,
 para processos assíncronos, o trecho real do log. As chamadas são executadas de verdade no instante
 em que o cursor clica em Enviar, e segredos aparecem mascarados. Quem assiste entende o que foi
-testado sem ler JSON. Um exemplo completo está em `template/skills/esteira-qa/assets/exemplo-api/`,
+testado sem ler JSON. Um exemplo completo está em `skills/esteira-qa/assets/exemplo-api/`,
 e `preparar-video.sh teste` roda esse exemplo sem câmera.
 
 O vídeo não substitui o teste: é a prova que deixa você conferir, em poucos minutos, que foi
@@ -292,23 +330,29 @@ patches de `salvage/`, rodadas do QA).
 ## O que tem neste repositório
 
 ```
-install.sh                                  liga a skill de bootstrap em ~/.claude/skills
-.claude/skills/esteira-bootstrap/           a skill de instalação e o esteira.py
-template/                                   o que é copiado para o projeto
-  pipeline/                                 → .claude/esteira/
-    REGRAS.md                               regras comuns que todo agente lê
-    config.template.json                    base do config.json
-    bin/
-      dispatch.py                           loop de uma fila: vagas, despacho, reconciliação
-      supervise.py                          loop do supervisor
-      worker.py                             begin/end/human dos trabalhadores
-      board.py                              operações no board e nas issues (via gh)
-      signals.py                            sinais determinísticos de risco (triagem e PRs)
-      worktree.sh, cleanup.sh, lock.sh      worktree idempotente, limpeza, travas
-      evidence.sh                           publica evidências no repositório de evidências
-      start-all.sh, run-loop.sh, status.py  subir tudo, loop de sessão nova, painel
-  skills/                                   → .claude/skills/
-    esteira-planejamento, esteira-dev, esteira-revisao, esteira-qa     as etapas
-    esteira-criar-issue, esteira-fila, esteira-up, esteira-status      operação
-    esteira-limpar-abas, esteira-triagem, esteira-monitor-prs
+install.sh                                  copia skills/esteira-* para o .claude/skills do projeto
+skills/                                     → .claude/skills/ do projeto
+  esteira-bootstrap/                        instalação: perguntas, board, labels, Herdr
+    scripts/esteira.py                      check / projects / install / configure
+    pipeline/                               → .claude/esteira/ (o bootstrap copia)
+      REGRAS.md                             regras comuns que todo agente lê
+      config.template.json                  base do config.json
+      bin/
+        dispatch.py                         loop de uma fila: vagas, despacho, reconciliação
+        supervise.py                        loop do supervisor
+        worker.py                           begin/end/human dos trabalhadores
+        board.py                            operações no board e nas issues (via gh)
+        signals.py                          sinais determinísticos de risco (triagem e PRs)
+        worktree.sh, cleanup.sh, lock.sh    worktree idempotente, limpeza, travas
+        evidence.sh                         publica evidências no repositório de evidências
+        start-all.sh, run-loop.sh, status.py  subir tudo, loop de sessão nova, painel
+  esteira-criar-issue                       a porta de entrada: pedido → issue na Planning queue
+  esteira-planejamento, esteira-dev, esteira-revisao, esteira-qa       as etapas
+  esteira-fila, esteira-up, esteira-status, esteira-limpar-abas        operação
+  esteira-triagem, esteira-monitor-prs      monitores de projeto público
 ```
+
+## Licença
+
+[MIT](LICENSE): use, copie, modifique e distribua à vontade, inclusive em projetos fechados,
+mantendo o aviso de copyright.

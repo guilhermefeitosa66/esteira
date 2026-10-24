@@ -21,16 +21,49 @@
   "trusted_domains": [],
   "max_workers": 4,
   "stages": {
-    "plan": {"queue": "Planning queue", "active": "Planning", "skill": "esteira-planejamento", "next": "Dev queue", "max": 1, "space": "plan", "heavy": false},
-    "dev": {"queue": "Dev queue", "active": "In development", "skill": "esteira-dev", "next": "Review queue", "max": 1, "space": "dev", "heavy": true},
-    "review": {"queue": "Review queue", "active": "In review", "skill": "esteira-revisao", "next": "QA queue", "max": 1, "space": "review", "heavy": true},
-    "qa": {"queue": "QA queue", "active": "In QA", "skill": "esteira-qa", "next": "Ready for release", "max": 1, "space": "qa", "heavy": true}
+    "plan": {
+      "queue": "Planning queue",
+      "active": "Planning",
+      "skill": "esteira-planejamento",
+      "next": "Dev queue",
+      "max": 1,
+      "space": "plan",
+      "heavy": false
+    },
+    "dev": {
+      "queue": "Dev queue",
+      "active": "In development",
+      "skill": "esteira-dev",
+      "next": "Review queue",
+      "max": 1,
+      "space": "dev",
+      "heavy": true
+    },
+    "review": {
+      "queue": "Review queue",
+      "active": "In review",
+      "skill": "esteira-revisao",
+      "next": "QA queue",
+      "max": 1,
+      "space": "review",
+      "heavy": true
+    },
+    "qa": {
+      "queue": "QA queue",
+      "active": "In QA",
+      "skill": "esteira-qa",
+      "next": "Ready for release",
+      "max": 1,
+      "space": "qa",
+      "heavy": true
+    }
   },
   "stale_minutes": 20,
   "max_attempts": 3,
   "evidence_repo": null,
   "evidence_checkout": "",
   "worktrees_dir": "",
+  "subdir": "",
   "state_dir": "",
   "min_free_ram_gb": 4,
   "timeouts": {
@@ -47,6 +80,13 @@
     "triage_seconds": 3600,
     "prs_seconds": 3600
   },
-  "monitor_spaces": {"triage": "monitor-issues", "prs": "monitor-pr", "supervisor": "supervisor"},
-  "manual_spaces": ["homolog", "release"]
+  "monitor_spaces": {
+    "triage": "monitor-issues",
+    "prs": "monitor-pr",
+    "supervisor": "supervisor"
+  },
+  "manual_spaces": [
+    "homolog",
+    "release"
+  ]
 }
