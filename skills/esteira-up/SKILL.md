@@ -20,6 +20,7 @@ Tudo é determinístico e idempotente:
 
 | Space | Aba 1 `monitor` | Demais abas |
 |---|---|---|
+| `product` | nenhum loop: espaço do mantenedor para discovery, criar issues e acompanhar a esteira | — |
 | `plan`, `dev`, `review`, `qa` | `dispatch.py <etapa> --loop` (a cada `loops.dispatch_seconds`) | as vagas: um Claude sempre aberto |
 | `homolog`, `release` | nenhum loop: espaço do mantenedor para homologar e lançar | — |
 | `monitor-issues`, `monitor-pr` | triagem e monitor de PRs (só com `monitors: true`, projeto público) | — |

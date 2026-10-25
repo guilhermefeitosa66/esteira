@@ -51,6 +51,7 @@ spaces, abas e um socket para controlar tudo de fora. A esteira cria um space po
 
 | Space | Aba 1 (`monitor`) | Demais abas |
 |---|---|---|
+| `product` | — | seu, para discovery, criar issues (`/esteira-criar-issue`) e acompanhar a esteira |
 | `plan`, `dev`, `review`, `qa` | o loop da fila (`dispatch.py`), sem LLM | as **vagas**: um Claude sempre aberto |
 | `homolog`, `release` | — | seus, para homologar e lançar |
 | `supervisor` | o supervisor (`supervise.py`), sem LLM | — |
@@ -318,7 +319,7 @@ config inválido é recusado (a passada é pulada) em vez de usado pela metade.
 | `claude_command` | `claude --dangerously-skip-permissions` | como as vagas abrem o Claude |
 | `git_ssh_command` | vazio | chave SSH fixa para push/pull, se a máquina tiver várias |
 | `trusted_domains` | `[]` | domínios normais em issues do projeto (para os sinais da triagem) |
-| `stages.<etapa>.space`, `monitor_spaces`, `manual_spaces` | `plan`, `dev`... | nomes dos spaces no Herdr |
+| `product_space`, `stages.<etapa>.space`, `monitor_spaces`, `manual_spaces` | `product`, `plan`, `dev`... | nomes dos spaces no Herdr |
 
 Um loop já rodando só pega um intervalo novo quando é reiniciado (feche a aba 1 do space e rode
 `/esteira-up`).

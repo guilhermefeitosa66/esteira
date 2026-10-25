@@ -81,6 +81,7 @@
     "triage_seconds": 3600,
     "prs_seconds": 3600
   },
+  "product_space": "product",
   "monitor_spaces": {
     "triage": "monitor-issues",
     "prs": "monitor-pr",

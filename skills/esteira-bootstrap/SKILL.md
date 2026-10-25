@@ -108,10 +108,10 @@ Diga a ele, em uma linha cada:
 .claude/esteira/bin/status.py
 ```
 
-Isso cria os spaces (`plan`, `dev`, `review`, `qa`, `homolog`, `release`, `supervisor` e, em
+Isso cria os spaces (`product`, `plan`, `dev`, `review`, `qa`, `homolog`, `release`, `supervisor` e, em
 público, `monitor-issues` e `monitor-pr`), abre uma vaga com um Claude em cada etapa e põe os loops
 para rodar. Se um space com o mesmo nome já existir e for de outro projeto (a aba 1 roda o loop de
-outra pasta), troque os nomes no config (`stages.<x>.space`, `monitor_spaces`, `manual_spaces`) para
+outra pasta), troque os nomes no config (`product_space`, `stages.<x>.space`, `monitor_spaces`, `manual_spaces`) para
 algo como `<projeto>-plan` e rode `start-all.sh` de novo.
 
 ## 5. Fechar

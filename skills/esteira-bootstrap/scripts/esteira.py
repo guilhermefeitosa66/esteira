@@ -304,7 +304,8 @@ def configure(args):
     tpl = json.loads((PIPELINE / "config.template.json").read_text())
     cfg = {**tpl, **{k: v for k, v in old.items() if k in ("stages", "loops", "timeouts", "max_workers",
                                                             "min_free_ram_gb", "trusted_domains", "claude_command",
-                                                            "git_ssh_command", "monitor_spaces", "manual_spaces")}}
+                                                            "git_ssh_command", "product_space", "monitor_spaces",
+                                                            "manual_spaces")}}
     cfg.update({
         "repo": repo["nameWithOwner"], "owner": owner, "owner_type": owner_type(owner),
         "visibility": args.visibility, "monitors": args.visibility == "public",

@@ -5,6 +5,8 @@
 #   start-all.sh --dry    print what it would do
 #
 # Layout (one Herdr space each, names from config.json, created if missing):
+#   product                       (product_space) first, no loop: where the maintainer
+#       does discovery, writes issues and follows the pipeline
 #   plan / dev / review / qa      (stages.<x>.space)
 #       tab 1 "monitor": dispatch.py <stage> --loop      tabs 2..: seats (Claude kept open)
 #   homolog / release             (manual_spaces) no loop: the maintainer works there
@@ -23,7 +25,7 @@ t=$(cfgv "c['loops']['triage_seconds']"); p=$(cfgv "c['loops']['prs_seconds']")
 ms() { cfgv "c['monitor_spaces']['$1']"; }
 # space|loop needle (pgrep)|command|stage   -- an empty needle means no loop.
 # Needles carry the full path: another project's loops on this machine must not count.
-spaces=()
+spaces=("$(cfgv "c.get('product_space', 'product')")|||")
 for k in $(cfgv "' '.join(c['stages'])"); do
   spaces+=("$(cfgv "c['stages']['$k']['space']")|$bin/dispatch.py $k --loop|$bin/dispatch.py $k --loop $d|$k")
 done
