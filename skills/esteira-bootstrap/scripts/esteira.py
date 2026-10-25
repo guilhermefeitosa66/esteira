@@ -50,6 +50,7 @@ LABELS = {
     "bug": ("d73a4a", "Something is not working"),
     "feature": ("a2eeef", "New feature or request"),
     "documentation": ("0075ca", "Documentation"),
+    "epic": ("3e4b9e", "Umbrella issue split into sub-issues; the work happens in the sub-issues"),
     "question": ("d876e3", "Question or support request"),
     "duplicate": ("cfd3d7", "Duplicate of another issue"),
 }

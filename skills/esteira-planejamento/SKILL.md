@@ -42,8 +42,9 @@ se a escolha mudar a direção do produto ou houver risco crítico.
 
 Issue grande demais para um PR revisável (mais ou menos 800 linhas de diff, ou várias áreas
 independentes): quebre em sub-issues. Para cada uma: `gh issue create` (labels herdadas +
-`triaged`), `$BIN/board.py snapshot save <M>` e `$BIN/board.py move <M> "Planning queue"`. Liste-as no
-plano da issue mãe, que vai para **Backlog** (`worker.py end plan <N> --to Backlog`) em vez de seguir.
+`triaged`, **menos** `epic`), `$BIN/board.py snapshot save <M>` e `$BIN/board.py move <M> "Planning queue"`.
+Liste-as no plano da issue mãe, marque a mãe como épico (`gh issue edit <N> --add-label epic`) e
+mande-a para **Backlog** (`worker.py end plan <N> --to Backlog`) em vez de seguir.
 
 ## 3. UI/UX (quando a issue muda algo visível)
 

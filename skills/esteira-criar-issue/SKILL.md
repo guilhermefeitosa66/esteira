@@ -57,6 +57,11 @@ quando a conta do GitHub for conhecida. Título curto, descrevendo o problema ou
 Só as que existem (`gh label list`): tipo (`bug`, `feature`, `documentation`...), área e plataforma
 se o repositório tiver, `community-report` quando veio de fora, e sempre `triaged`.
 
+**Épico?** Se o pedido é grande demais para um PR revisável e claramente se divide em partes que
+viram PRs separados (várias telas, várias áreas, fases), acrescente `epic`. A issue vai para a
+Planning queue normalmente: o planejamento quebra em sub-issues e estaciona a mãe no Backlog.
+`epic` marca só a issue mãe, nunca as sub-issues (que não herdam essa label).
+
 ## 4. Criar e enfileirar
 
 ```bash
