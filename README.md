@@ -197,10 +197,25 @@ Pronto: a esteira está de pé, esperando a primeira issue.
 > chamado "Esteira", sem apagar nada do seu "Status". A API do GitHub não cria visões, então agrupe a
 > visão do board por esse campo na interface (Board → menu da visão → Group by: Esteira).
 
-**Atualizar.** Rode o mesmo comando do passo 1 na pasta do projeto. As skills `esteira-*` são
-trocadas pelas novas e, se a esteira já estiver configurada, os scripts de `.claude/esteira/`
-também; o `config.json` e os ganchos (`hooks/`) ficam. Os loops que já estão rodando pegam o código
-novo quando são reiniciados: feche a aba 1 dos spaces e rode `/esteira-up`.
+**Atualizar.** No Claude, dentro do projeto:
+
+```
+/esteira-atualizar
+```
+
+O commit da esteira instalado fica em `.claude/esteira-versao.json`. A skill compara esse commit com
+a `main` do repositório e, se houver novidade, faz o merge de 3 vias de cada arquivo (a versão
+instalada, a do projeto e a nova): o que você não mexeu recebe a versão nova, o que só você mexeu
+fica como está, e o que os dois mudaram é mesclado. Quando as mudanças batem no mesmo trecho, o
+Claude junta as duas intenções e, se elas forem incompatíveis, pergunta. As suas melhorias nas
+skills e nos scripts não se perdem; o `config.json` e os `hooks/` nunca são tocados. Os loops que
+já estão rodando pegam o código novo quando são reiniciados: feche a aba 1 dos spaces e rode
+`/esteira-up`.
+
+Instalou antes de existir o `/esteira-atualizar`? Rode o comando do passo 1 de novo: com a esteira
+já instalada, ele não sobrescreve nada e só copia a skill de atualização (abra o Claude de novo para
+ela aparecer). Sem o arquivo de versão, a skill estima de qual commit veio a sua instalação. Para
+trocar tudo pelas skills novas, descartando os ajustes locais, rode `install.sh --sobrescrever`.
 
 ## O dia a dia
 
@@ -223,6 +238,7 @@ labels e põe na `Planning queue`. Uma issue criada à mão entra quando você a
 | `/esteira-scale qa 3` | quantos trabalhos simultâneos a fila roda (abre ou fecha vagas) |
 | `/esteira-up` | sobe tudo de novo (depois de um reinício, por exemplo); não duplica nada |
 | `/esteira-limpar-abas` | fecha abas ociosas que ficaram para trás nos spaces |
+| `/esteira-atualizar` | traz as novidades da esteira sem perder os seus ajustes nas skills |
 
 **Homologar.** A issue chega em `Ready for release` com o plano, o PR, a revisão e o relatório do QA
 na própria issue, e o vídeo da rodada aprovada. Confira, teste à mão se quiser, e lance.
@@ -355,6 +371,7 @@ patches de `salvage/`, rodadas do QA).
 
 ```
 install.sh                                  copia skills/esteira-* para o .claude/skills do projeto
+                                            e grava o commit em .claude/esteira-versao.json
 skills/                                     → .claude/skills/ do projeto
   esteira-bootstrap/                        instalação: perguntas, board, labels, Herdr
     scripts/esteira.py                      check / projects / install / configure
@@ -374,6 +391,7 @@ skills/                                     → .claude/skills/ do projeto
   esteira-planejamento, esteira-dev, esteira-revisao, esteira-qa       as etapas
   esteira-fila, esteira-scale, esteira-up, esteira-status,
   esteira-limpar-abas                       operação
+  esteira-atualizar                         atualização com merge de 3 vias (scripts/atualizar.py)
   esteira-triagem, esteira-monitor-prs      monitores de projeto público
 ```
 
