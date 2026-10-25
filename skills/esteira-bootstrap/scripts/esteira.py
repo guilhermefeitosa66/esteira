@@ -236,9 +236,32 @@ def board(args, repo, owner):
     if missing:
         out({"erro": f"o campo {field_name} do board {number} não tem as colunas {missing}; "
                      "acrescente-as na interface do GitHub e rode configure de novo"}, 1)
+    v = None if created else view(proj["id"], repo["nameWithOwner"])
     return {"project_number": number, "project_id": proj["id"], "project_url": proj.get("url"),
             "status_field_name": field_name, "status_field_id": f["id"],
-            "status_options": {n: options[n] for n in names}, "board_created": created}
+            "status_options": {n: options[n] for n in names}, "board_created": created,
+            "view": v and {**v, "agrupar_colunas_por": field_name,
+                           "agrupamento_manual": v["colunas_por"] != field_name}}
+
+
+def view(project_id, repo):
+    # Board existente: as visões dele são do usuário e ficam como estão. A esteira ganha uma visão
+    # própria, "Esteira", em quadro e filtrada pelo repositório. A API não escolhe o campo das
+    # colunas (o quadro novo nasce agrupado por Status).
+    q = """query($p:ID!){ node(id:$p){ ... on ProjectV2{ views(first:50){ nodes{ id name number
+      verticalGroupByFields(first:1){ nodes{ ... on ProjectV2FieldCommon{ name } } } } } } } }"""
+    found = [n for n in graphql(q, p=project_id)["node"]["views"]["nodes"] if n["name"] == "Esteira"]
+    created = not found
+    if created:
+        q = """mutation($p:ID!){ createProjectV2View(input:{projectId:$p, name:"Esteira", layout:BOARD_LAYOUT}){
+          projectV2View{ id name number verticalGroupByFields(first:1){ nodes{ ... on ProjectV2FieldCommon{ name } } } } } }"""
+        found = [graphql(q, p=project_id)["createProjectV2View"]["projectV2View"]]
+        q = """mutation($v:ID!,$f:String!){ updateProjectV2View(input:{viewId:$v, filter:$f}){ projectV2View{ id } } }"""
+        graphql(q, v=found[0]["id"], f=f"repo:{repo}")
+    v = found[0]
+    by = v["verticalGroupByFields"]["nodes"]
+    return {"nome": v["name"], "numero": v["number"], "criada": created,
+            "colunas_por": by[0]["name"] if by else None}
 
 
 def labels(repo, public):

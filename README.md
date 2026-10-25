@@ -193,9 +193,11 @@ Ele:
 
 Pronto: a esteira está de pé, esperando a primeira issue.
 
-> **Board existente.** Se o seu board não tem as colunas da esteira, ela cria um campo próprio
-> chamado "Esteira", sem apagar nada do seu "Status". A API do GitHub não cria visões, então agrupe a
-> visão do board por esse campo na interface (Board → menu da visão → Group by: Esteira).
+> **Board existente.** A esteira não mexe nas visões que você já usa: cria uma visão nova, "Esteira",
+> em quadro e filtrada pelo repositório. Se o seu board não tem as colunas da esteira, ela também cria
+> um campo próprio chamado "Esteira", sem apagar nada do seu "Status". A API do GitHub não escolhe o
+> campo das colunas, então, nesse caso, abra a visão "Esteira" e troque na interface (menu da visão →
+> Column by: Esteira).
 
 **Atualizar.** No Claude, dentro do projeto:
 

@@ -55,9 +55,11 @@ chamada só de `AskUserQuestion`:
 
 1. **Board**: "Usar um projeto do GitHub que você já tem, ou criar um novo com as colunas da
    esteira?" Opções: "Criar um novo (Recomendado)" e os projetos existentes (até três; o resto ele
-   escreve em "Other"). Num board existente que não tenha as colunas, a esteira cria um campo
-   próprio, "Esteira", sem apagar nada; avise que ele precisa agrupar a visão do board por esse campo
-   na interface do GitHub (a API não cria visões).
+   escreve em "Other"). Num board existente a esteira não mexe nas visões que ele já usa: cria uma
+   visão nova, "Esteira", em quadro e filtrada pelo repositório. Se o board não tiver as colunas, ela
+   também cria um campo próprio, "Esteira", sem apagar nada; nesse caso avise que ele precisa abrir
+   a visão "Esteira" e trocar o agrupamento das colunas para esse campo na interface do GitHub (a
+   API cria a visão, mas não escolhe o campo das colunas).
 2. **Projeto**: "O projeto é open source e recebe contribuição de fora?" Opções: "Privado / só eu e
    o time" e "Público, com contribuições externas". Público liga a triagem de issues e o monitor de
    PRs (com a quarentena silenciosa); privado não sobe esses dois.
@@ -89,6 +91,8 @@ python3 $E configure --board <new|número> [--title "<nome>"] --visibility <publ
   rodadas aprovadas e o planejamento as imagens de UI). Grava `.claude/esteira/config.json`.
 - Se `configure` recusar (colunas faltando num board existente, escopo do `gh`), explique e resolva
   com ele.
+- Num board existente, a saída traz `board.view`. Se `agrupamento_manual` vier `true`, passe o link
+  do board e diga: na visão "Esteira", "Column by" → o campo em `agrupar_colunas_por`.
 
 Diga a ele, em uma linha cada:
 - se o projeto precisa derrubar algo específico no fim de cada trabalho (emulador, VM, display de
