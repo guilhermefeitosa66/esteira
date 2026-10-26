@@ -6,7 +6,8 @@ skills read results instead of guessing. Talks to GitHub only through `gh`.
 
   board.py list "<Status>"            items in a column, oldest issue first
   board.py status <issue>             current column of an issue ("" if none)
-  board.py move <issue> "<Status>"    move (adds the issue to the board if needed)
+  board.py move <issue> "<Status>"    move (adds the issue to the board if needed); a move into
+                                      a stage's queue wakes that stage's dispatcher
   board.py clear <issue>              remove the Status (sends it back to triage)
   board.py snapshot save <issue>      record the title+body hash seen at triage
   board.py snapshot check <issue>     {"ok": bool, ...}: body unchanged since triage?
@@ -103,6 +104,14 @@ def ensure_item(number):
     return json.loads(out)["id"]
 
 
+def wake_for(status):
+    """Moving into a stage's queue column wakes that stage's dispatcher loop
+    (same `wake-<stage>` file as lib.wake), so the item waits seconds, not a whole interval."""
+    for key, st in CFG["stages"].items():
+        if st["queue"] == status:
+            (STATE / f"wake-{key}").touch()
+
+
 def move(number, status):
     if status not in CFG["status_options"]:
         sys.exit(f"unknown status {status!r}; valid: {list(CFG['status_options'])}")
@@ -110,6 +119,7 @@ def move(number, status):
     gh("project", "item-edit", "--project-id", CFG["project_id"], "--id", item,
        "--field-id", CFG["status_field_id"],
        "--single-select-option-id", CFG["status_options"][status])
+    wake_for(status)
     print(json.dumps({"issue": number, "status": status}))
 
 
@@ -199,6 +209,7 @@ def move_url(url, status):
     gh("project", "item-edit", "--project-id", CFG["project_id"], "--id", json.loads(out)["id"],
        "--field-id", CFG["status_field_id"],
        "--single-select-option-id", CFG["status_options"][status])
+    wake_for(status)
     print(json.dumps({"url": url, "status": status}))
 
 

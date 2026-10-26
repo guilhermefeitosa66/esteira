@@ -238,6 +238,7 @@ labels e põe na `Planning queue`. Uma issue criada à mão entra quando você a
 |---|---|
 | `/esteira-status` | filas, o que cada vaga está fazendo, travas, RAM, loops de pé |
 | `/esteira-fila dev` | uma passada na hora numa fila, sem esperar os 15 minutos |
+| `/esteira-acordar dev` | avisa o loop da fila que tem coisa nova (issue arrastada à mão no board) |
 | `/esteira-scale qa 3` | quantos trabalhos simultâneos a fila roda (abre ou fecha vagas) |
 | `/esteira-up` | sobe tudo de novo (depois de um reinício, por exemplo); não duplica nada |
 | `/esteira-limpar-abas` | fecha abas ociosas que ficaram para trás nos spaces |
@@ -392,7 +393,7 @@ skills/                                     → .claude/skills/ do projeto
         start-all.sh, run-loop.sh, status.py  subir tudo, loop de sessão nova, painel
   esteira-criar-issue                       a porta de entrada: pedido → issue na Planning queue
   esteira-planejamento, esteira-dev, esteira-revisao, esteira-qa       as etapas
-  esteira-fila, esteira-scale, esteira-up, esteira-status,
+  esteira-fila, esteira-acordar, esteira-scale, esteira-up, esteira-status,
   esteira-limpar-abas                       operação
   esteira-atualizar                         atualização com merge de 3 vias (scripts/atualizar.py)
   esteira-triagem, esteira-monitor-prs      monitores de projeto público

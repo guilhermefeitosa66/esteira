@@ -6,6 +6,8 @@
                                  a pass within seconds whenever `wake-<stage>` is touched
                                  (lib.wake: a job ended, a seat was recycled)
   dispatch.py seats <stage>      make sure the stage's seats exist (tabs 2..max+1, Claude open)
+  dispatch.py wake <stage>|all   wake the running loop(s) now, e.g. after an issue was dragged
+                                 into a queue on the GitHub board (board.py move already wakes)
   dispatch.py scale <stage> N    set the stage's seat count (config `max`) and open/close seats;
                                  a busy seat over the count closes once its job ends
 
@@ -208,6 +210,14 @@ def one_pass(stage_key):
 def main(argv):
     if not argv:
         sys.exit(__doc__)
+    if argv[0] == "wake":
+        c = lib.cfg()
+        stages = list(c["stages"]) if argv[1:] == ["all"] else argv[1:]
+        if not stages or any(s not in c["stages"] for s in stages):
+            sys.exit(f"usage: dispatch.py wake <stage>|all; stages: {', '.join(c['stages'])}")
+        lib.wake(*stages)
+        print("woke: " + ", ".join(stages))
+        return
     if argv[0] == "scale":
         lib.require_herdr()
         if len(argv) != 3 or not argv[2].isdigit():
