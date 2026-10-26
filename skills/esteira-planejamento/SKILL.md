@@ -44,12 +44,15 @@ Issue grande demais para um PR revisável (mais ou menos 800 linhas de diff, ou 
 independentes): quebre em sub-issues. Para cada uma: `gh issue create --parent <N>` (labels
 herdadas + `triaged`, **menos** `epic`), `$BIN/board.py snapshot save <M>` e `$BIN/board.py move <M> "Planning queue"`.
 O `--parent` é obrigatório: é o vínculo real de sub-issue que dá à mãe a barra de progresso no
-GitHub; escrever "Sub-issue of #N" no corpo não basta (escreva também, como contexto). Crie-as na
+GitHub, e ele já mostra a mãe em cada sub-issue. **Não cite a mãe nem outras issues com `#<número>`
+no corpo**: o GitHub transforma todo `#<número>` em link e põe a referência na timeline da issue
+citada, e o agente que lê qualquer uma das duas com contexto limpo puxa a outra junto e se
+confunde. Quando precisar falar de outra issue, escreva o número sem cerquilha ("issue 586"). Crie-as na
 ordem em que devem ser feitas, que é a ordem em que a barra as lista. Se a issue que você está
 quebrando já é sub-issue de outra, as novas ficam penduradas nela, e não no avô. Antes de
 encerrar, confira: `gh api repos/<repo>/issues/<N>/sub_issues --jq '[.[].number]'` tem de listar
 todas; a que faltar entra com `gh issue edit <N> --add-sub-issue <M>`.
-Liste-as no plano da issue mãe, marque a mãe como épico (`gh issue edit <N> --add-label epic`) e
+Liste-as no plano da issue mãe pelo número sem cerquilha (a barra de sub-issues já faz os links), marque a mãe como épico (`gh issue edit <N> --add-label epic`) e
 mande-a para **Backlog** (`worker.py end plan <N> --to Backlog`) em vez de seguir.
 
 ## 3. UI/UX (quando a issue muda algo visível)

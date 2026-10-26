@@ -65,7 +65,9 @@ Planning queue normalmente: o planejamento quebra em sub-issues e estaciona a m�
 **Faz parte de um épico que já existe?** Se o pedido é uma parte de um épico aberto
 (`gh issue list --label epic`), crie com `gh issue create --parent <épico>`: o vínculo real de
 sub-issue é o que alimenta a barra de progresso da mãe no GitHub, e a label não aparece na visão do
-board. Mencionar a mãe no corpo é contexto, não vínculo.
+board. Não cite a mãe (nem outra issue) com `#<número>` no corpo: o GitHub vira isso em link e põe
+a referência na timeline da issue citada, o que contamina o contexto de quem ler qualquer uma das
+duas. Se precisar falar dela, escreva o número sem cerquilha ("issue 586").
 
 ## 4. Criar e enfileirar
 
