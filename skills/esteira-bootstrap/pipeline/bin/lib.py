@@ -90,6 +90,49 @@ def wake(*stage_keys):
             (state_dir() / f"wake-{s}").touch()
 
 
+# --- Code reload ----------------------------------------------------------------
+# A loop runs for days; without this, an edit to the scripts (a new rule, an
+# /esteira-atualizar) only applies after somebody restarts every monitor tab.
+
+def code_stamp():
+    return {str(p): p.stat().st_mtime for p in sorted(Path(HERE).glob("*.py"))}
+
+
+def reexec_if_changed(stamp, label):
+    """Between passes: if any script changed since `stamp`, restart this
+    process in place (same pid, same Herdr tab) on the new code."""
+    if code_stamp() != stamp:
+        log(f"{label}: scripts changed, reloading")
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+
+
+# --- Pause --------------------------------------------------------------------
+# A paused stage keeps its loop running (reconcile, seats) and lets the jobs in
+# its seats finish, but takes nothing new from its queue. The flag is a file in
+# the state dir, so it survives a reboot and /esteira-up until it is resumed.
+
+def pause_path(stage_key):
+    return state_dir() / f"paused-{stage_key}"
+
+
+def paused(stage_key):
+    """The pause record ({"since", "reason"}) or None."""
+    p = pause_path(stage_key)
+    if not p.exists():
+        return None
+    return load(p, None) or {"since": p.stat().st_mtime, "reason": ""}
+
+
+def pause(stage_key, reason=""):
+    if not paused(stage_key):
+        save(pause_path(stage_key), {"since": time.time(), "reason": reason})
+
+
+def resume(stage_key):
+    pause_path(stage_key).unlink(missing_ok=True)
+    wake(stage_key)
+
+
 def stage_for_queue(c, status):
     """The stage whose queue column is `status`, if any."""
     return next((k for k, st in c["stages"].items() if st["queue"] == status), None)

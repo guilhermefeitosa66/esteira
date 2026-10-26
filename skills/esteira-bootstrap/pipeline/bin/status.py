@@ -44,7 +44,8 @@ def loops():
     if lib.cfg().get("monitors"):
         needles += [("triagem", f"{b}/run-loop.sh esteira-triagem"), ("monitor-prs", f"{b}/run-loop.sh esteira-monitor-prs")]
     for name, needle in needles:
-        out[name] = needle in ps
+        # "<interpreter> <script> ...": a shell that only mentions it does not count.
+        out[name] = any(l.split(" ", 1)[1:2] and l.split(" ", 1)[1].startswith(needle) for l in ps.splitlines())
     return out
 
 
@@ -64,7 +65,9 @@ def main():
                 seats.append({"tab": s["tab"], "label": s["label"], "agent": a.get("name"),
                               "status": a.get("agent_status") or "sem Claude",
                               "issue": cl["issue"] if cl else None, "since": ago(cl["ts"]) if cl else "-"})
-        data["stages"][key] = {"queue": queued, "seats": seats, "max": st["max"]}
+        p = lib.paused(key)
+        data["stages"][key] = {"queue": queued, "seats": seats, "max": st["max"],
+                               "paused": {"since": ago(p["since"]), "reason": p.get("reason", "")} if p else None}
     if "--json" in sys.argv:
         print(json.dumps(data, indent=1, ensure_ascii=False))
         return
@@ -72,7 +75,9 @@ def main():
     print(f"RAM livre: {data['ram_free_gb']} GB (pausa abaixo de {c['min_free_ram_gb']} GB) · travas: {locks}")
     print("Loops: " + ", ".join(f"{k} {'✓' if v else '✗'}" for k, v in data["loops"].items()))
     for key, s in data["stages"].items():
-        print(f"\n[{key}] fila ({len(s['queue'])}): {' '.join('#%d' % n for n in s['queue']) or '-'}")
+        pause = (f" · PAUSADA há {s['paused']['since']}" + (f" ({s['paused']['reason']})" if s['paused']['reason'] else "")
+                 if s["paused"] else "")
+        print(f"\n[{key}] fila ({len(s['queue'])}): {' '.join('#%d' % n for n in s['queue']) or '-'}{pause}")
         for seat in s["seats"] or [{"tab": "-", "label": "sem vagas", "agent": "", "status": "", "issue": None, "since": "-"}]:
             job = f"#{seat['issue']} há {seat['since']}" if seat["issue"] else "livre"
             print(f"  {seat['tab']:<8} {seat['label']:<14} {seat['agent'] or '':<14} {seat['status']:<11} {job}")

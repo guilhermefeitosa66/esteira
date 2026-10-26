@@ -30,9 +30,12 @@ Tudo é determinístico e idempotente:
 - Loop que já está rodando fica como está. Nunca mate um loop para "reiniciar limpo" sem pedido.
 - Aba 1 com um Claude dentro é só reportada: diga para fechar (`/exit`) e rodar de novo.
 - Intervalos, limites e nomes mudam no `.claude/esteira/config.json`. Um loop já de pé só pega um
-  intervalo novo quando é reiniciado.
+  intervalo novo quando é reiniciado. Mudança nos scripts (`*.py` de `bin/`, um `/esteira-atualizar`)
+  os loops pegam sozinhos: antes de cada passada eles conferem e se recarregam no mesmo processo.
+- Fila pausada (`/esteira-pausar`) **continua pausada** depois do `/esteira-up` e de um reinício: o
+  loop sobe, mas não despacha. Não retome por conta própria; só diga quais estão pausadas.
 - Nunca rode release nem nada no space `release` por conta própria.
 
 Depois, rode `.claude/esteira/bin/status.py` e responda em português, curto: o que foi criado (`+`),
 renomeado (`~`), iniciado (`>`), o que já estava de pé (`=`), qualquer `!` com o que fazer, e a
-linha dos loops (todos ✓?).
+linha dos loops (todos ✓?) e quais filas estão `PAUSADA`.

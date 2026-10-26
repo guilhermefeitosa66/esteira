@@ -30,10 +30,12 @@ O que uma passada faz (sob uma trava compartilhada com as outras filas e o super
 2. **Vagas.** O space tem a aba 1 (monitor) e `stages.<etapa>.max` vagas (`/esteira-scale` muda): abas com um Claude
    permanente. Falta vaga, ela abre; o Claude da vaga caiu, ela sobe outro.
 3. **Memória.** Etapa pesada não despacha com menos de `min_free_ram_gb` livres.
+   **Pausa.** Fila pausada com `/esteira-pausar` não despacha nada, nem nesta passada manual. Para
+   despachar, `/esteira-retomar` (não apague o sinalizador à mão).
 4. **Despacha**, enquanto houver vaga livre (ociosa e sem tarefa em segundo plano): confere o
    snapshot da triagem, move para a coluna ativa, dá `/clear` na vaga, nomeia a aba `#<N> <etapa>`,
    manda `/<skill da etapa> <N>` e confere que o turno começou.
 
 Responda com o que o script imprimiu, sempre com o motivo quando nada foi despachado (vagas
-ocupadas, memória baixa, fila vazia). Não investigue issue nenhuma aqui. Estado: `/esteira-status`.
+ocupadas, memória baixa, fila vazia, fila pausada). Não investigue issue nenhuma aqui. Estado: `/esteira-status`.
 Log: `<state_dir>/dispatch.log`.

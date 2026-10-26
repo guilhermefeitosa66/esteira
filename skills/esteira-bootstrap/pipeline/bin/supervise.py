@@ -231,7 +231,9 @@ def one_pass():
 def main(argv):
     if "--loop" in argv:
         every = int(argv[argv.index("--loop") + 1])
+        stamp = lib.code_stamp()
         while True:
+            lib.reexec_if_changed(stamp, "supervisor")
             try:
                 one_pass()
             except Exception as e:

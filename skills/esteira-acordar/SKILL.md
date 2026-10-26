@@ -33,4 +33,4 @@ que já está de pé.
 
 Responda com o que o comando imprimiu e, depois de uns 10 s, a última linha da etapa em
 `dispatch.log` no `state_dir` (`woken ...`, ou o motivo de nada ter saído: vagas ocupadas, memória
-baixa, fila vazia). Se não aparecer `woken`, o loop não está de pé: diga isso e sugira `/esteira-up`.
+baixa, fila vazia, `paused by the maintainer` = fila pausada, `/esteira-retomar` para voltar). Se não aparecer `woken`, o loop não está de pé: diga isso e sugira `/esteira-up`.

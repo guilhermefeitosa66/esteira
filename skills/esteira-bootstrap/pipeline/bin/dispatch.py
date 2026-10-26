@@ -8,6 +8,10 @@
   dispatch.py seats <stage>      make sure the stage's seats exist (tabs 2..max+1, Claude open)
   dispatch.py wake <stage>|all   wake the running loop(s) now, e.g. after an issue was dragged
                                  into a queue on the GitHub board (board.py move already wakes)
+  dispatch.py pause <stage>|all [reason]
+                                 stop taking new issues from the queue; jobs already in a
+                                 seat finish normally (flag `paused-<stage>` in the state dir)
+  dispatch.py resume <stage>|all take from the queue again, with a pass right away
   dispatch.py scale <stage> N    set the stage's seat count (config `max`) and open/close seats;
                                  a busy seat over the count closes once its job ends
 
@@ -16,7 +20,8 @@ One pass, under the machine-wide pipeline lock:
   1. reconcile: a claim whose issue already left the active column is dropped;
      an issue in the active column with no claim goes back to its queue.
      (Seats that are alive but stuck are the supervisor's job, see supervise.py.)
-  2. memory budget: a heavy stage (dev/review/qa) dispatches nothing while
+  2. paused by the maintainer (`dispatch.py pause`): nothing is dispatched.
+     memory budget: a heavy stage (dev/review/qa) dispatches nothing while
      MemAvailable is below `min_free_ram_gb`.
   3. for each queued issue while a seat is free: check the triage snapshot,
      claim it (move to the active column), /clear the seat, rename the tab
@@ -180,6 +185,11 @@ def one_pass(stage_key):
         seats = ensure_seats(stage_key, c)
         if not queued:
             return
+        p = lib.paused(stage_key)
+        if p:
+            lib.log(f"{stage_key}: {len(queued)} queued, paused by the maintainer"
+                    + (f" ({p['reason']})" if p.get("reason") else ""))
+            return
         if stage.get("heavy") and lib.free_ram_gb() < c["min_free_ram_gb"]:
             lib.log(f"{stage_key}: {len(queued)} queued, paused: low memory "
                     f"({lib.free_ram_gb():.1f} GB free < {c['min_free_ram_gb']} GB)")
@@ -218,6 +228,18 @@ def main(argv):
         lib.wake(*stages)
         print("woke: " + ", ".join(stages))
         return
+    if argv[0] in ("pause", "resume"):
+        c = lib.cfg()
+        stages = list(c["stages"]) if argv[1:2] == ["all"] else argv[1:2]
+        if not stages or any(s not in c["stages"] for s in stages):
+            sys.exit(f"usage: dispatch.py {argv[0]} <stage>|all; stages: {', '.join(c['stages'])}")
+        for s in stages:
+            if argv[0] == "pause":
+                lib.pause(s, " ".join(argv[2:]))
+            else:
+                lib.resume(s)
+            lib.log(f"{s}: {'paused' if argv[0] == 'pause' else 'resumed'} by the maintainer")
+        return
     if argv[0] == "scale":
         lib.require_herdr()
         if len(argv) != 3 or not argv[2].isdigit():
@@ -235,7 +257,9 @@ def main(argv):
         sys.exit(f"unknown stage {stage_key}")
     if "--loop" in argv:
         every = int(argv[argv.index("--loop") + 1])
+        stamp = lib.code_stamp()
         while True:
+            lib.reexec_if_changed(stamp, stage_key)
             started = time.time()
             try:
                 one_pass(stage_key)

@@ -59,7 +59,9 @@ for entry in "${spaces[@]}"; do
   tab=$(herdr tab list --workspace "$ws" | js "sorted(d['tabs'],key=lambda t:t['number'])[0]['tab_id']")
   pane=$(herdr pane list --workspace "$ws" | js "[p['pane_id'] for p in d['panes'] if p['tab_id']=='$tab'][0]")
   agent=$(herdr pane list --workspace "$ws" | js "[p.get('agent') or '' for p in d['panes'] if p['tab_id']=='$tab'][0]")
-  if pgrep -f -- "$needle" >/dev/null; then
+  # Anchored on "<interpreter> <full script path>": a bare needle also matches
+  # any shell whose command line merely mentions it, and the loop is skipped.
+  if pgrep -f -- "^[^ ]+ $needle" >/dev/null; then
     echo "= $space: loop already running"
   elif [[ -n $agent ]]; then
     echo "! $space: tab 1 has a $agent session; close it (/exit) and run this again"
