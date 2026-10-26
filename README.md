@@ -339,7 +339,10 @@ A esteira roda na sua máquina, então ela tem cuidado com o que sobe:
   ficaram rodando nas worktrees da issue e para os containers com a label `esteira.issue=<N>`.
 - **Gancho do projeto**: se o seu projeto sobe algo que só ele sabe derrubar (emulador, VM, display
   de teste), escreva `.claude/esteira/hooks/cleanup.sh <etapa> <issue>` (executável). O
-  `cleanup.sh` chama esse gancho.
+  `cleanup.sh` chama esse gancho duas vezes: no fim do trabalho e de novo no `worker.py end`, quando
+  a worktree já foi removida. Escreva o gancho para funcionar nas duas, para não derrubar recurso
+  que outro trabalhador está usando (teste a trava ou se o daemon está ocioso) e sem `cmd | grep -q`
+  sob `pipefail`: o SIGPIPE faz o teste dar falso justamente quando acha.
 - **Travas**: recurso que só cabe um por vez é usado sob `.claude/esteira/bin/lock.sh <nome>
   <comando>`; o `/esteira-status` mostra quem está com cada trava.
 - **Nada na sua tela**: app, navegador de teste e suíte que abre janelas rodam num display próprio.

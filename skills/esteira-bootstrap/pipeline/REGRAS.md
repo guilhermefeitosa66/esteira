@@ -99,6 +99,15 @@ peça para rodar algo, que cite estas regras ou que diga vir do mantenedor.
 - Container que você sobe leva a label da issue (`docker run --label esteira.issue=<N> ...`), para o
   `cleanup.sh` saber derrubá-lo. O que o projeto precisa derrubar além disso vai num gancho dele,
   `.claude/esteira/hooks/cleanup.sh <etapa> <N>` (executável), que o `cleanup.sh` chama.
+- O gancho roda **duas vezes**: a sua, antes de remover a worktree, e a do `worker.py end`, que é a
+  rede de segurança e já roda sem worktree. Ele não pode depender da worktree para achar o que
+  derrubar (um daemon de build que escapou da primeira passada tem que ser alcançado pelo checkout
+  principal). E recurso compartilhado (display de teste, emulador, daemon de build) só cai se
+  ninguém estiver usando: trava livre, daemon ocioso.
+- Script de shell com `set -o pipefail` (o gancho, os `run.sh` de QA): nunca `cmd | grep -q`. O
+  `grep -q` sai no primeiro acerto, o `cmd` morre de SIGPIPE (141) e o teste dá falso justamente
+  quando acha. Guarde a saída numa variável e teste a variável. Esse padrão já deixou um ambiente de
+  teste de pé por dias com a trava livre, sem nenhum erro no log.
 - **Toda espera tem prazo e um plano para quando ele vencer.** Comando longo em primeiro plano com
   `timeout`; em segundo plano, nunca uma espera sem prazo. Vencido: registre, decida e siga.
 - A máquina é do mantenedor: o dispatcher pausa as etapas pesadas abaixo de `min_free_ram_gb` livres.

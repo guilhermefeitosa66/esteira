@@ -96,7 +96,8 @@ python3 $E configure --board <new|número> [--title "<nome>"] --visibility <publ
 
 Diga a ele, em uma linha cada:
 - se o projeto precisa derrubar algo específico no fim de cada trabalho (emulador, VM, display de
-  teste), isso vai num gancho executável `.claude/esteira/hooks/cleanup.sh <etapa> <issue>`;
+  teste), isso vai num gancho executável `.claude/esteira/hooks/cleanup.sh <etapa> <issue>`, que
+  roda de novo depois que a worktree já foi removida e só derruba recurso compartilhado ocioso;
 - recurso que só cabe um por vez vai sob `.claude/esteira/bin/lock.sh <nome> <comando>`;
 - as instruções do projeto (`CLAUDE.md`, `README.md`) são o que os agentes leem para saber como
   rodar e testar: quanto mais claras, melhor a esteira trabalha.

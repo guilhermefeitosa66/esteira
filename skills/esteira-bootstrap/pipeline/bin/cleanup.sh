@@ -38,6 +38,10 @@ if command -v docker >/dev/null; then
 fi
 
 # 3. The project's own teardown (emulators, test displays, VMs, daemons...).
+#    It runs again from worker.py end after the worktree is gone, so it must not
+#    need the worktree, and it must leave shared resources alone while another
+#    worker holds them. Hooks under pipefail: no `cmd | grep -q` (SIGPIPE turns
+#    a match into "not found"); capture the output and test that.
 hook=$here/../hooks/cleanup.sh
 if [[ -x $hook ]]; then
   ESTEIRA_STATE=$state ESTEIRA_WORKTREES=$wtdir timeout 120 "$hook" "$stage" "$issue" 2>&1 | sed 's/^/cleanup (hook): /'
