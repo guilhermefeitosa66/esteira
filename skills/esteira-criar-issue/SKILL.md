@@ -62,6 +62,11 @@ viram PRs separados (várias telas, várias áreas, fases), acrescente `epic`. A
 Planning queue normalmente: o planejamento quebra em sub-issues e estaciona a mãe no Backlog.
 `epic` marca só a issue mãe, nunca as sub-issues (que não herdam essa label).
 
+**Faz parte de um épico que já existe?** Se o pedido é uma parte de um épico aberto
+(`gh issue list --label epic`), crie com `gh issue create --parent <épico>`: o vínculo real de
+sub-issue é o que alimenta a barra de progresso da mãe no GitHub, e a label não aparece na visão do
+board. Mencionar a mãe no corpo é contexto, não vínculo.
+
 ## 4. Criar e enfileirar
 
 ```bash
