@@ -53,6 +53,12 @@ Force-push só com `--force-with-lease` e só na branch da issue.
 
 ## 3. Implementar
 
+- **Design pronto: use o artifact.** Se o plano traz `Design artifact: <url>` (o projeto de design
+  chamado `#<N> ...`), abra-o antes de mexer na UI: `Artifact` `action: "read"` com a `url`,
+  `action: "list"` + `scope: "files"` / `"assets"` para ver o que ele tem, e `read` + `path` para
+  baixar cada arquivo. Tire dali medidas, hierarquia, textos e os assets (SVGs, ícones, imagens) em
+  vez de recriá-los; as imagens anexas na issue são só a prévia. Link fora do ar ou sem acesso:
+  siga pela spec e pelas imagens do plano e registre no comentário final.
 - Siga o plano. Se algo nele se mostrar errado ao tocar o código, ajuste com o menor desvio e
   registre no comentário final. Desvio que muda o que o usuário vê ou o escopo → intervenção humana.
 - Estilo do código vizinho, sem reformatar o que não mudou. Textos visíveis seguem o mecanismo de

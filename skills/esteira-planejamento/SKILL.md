@@ -57,8 +57,16 @@ contraste).
 **Prazo: 30 min.** Imagens ajudam: se você conseguir gerar um mock (por exemplo, um HTML estático
 renderizado com `google-chrome --headless=new --screenshot=out.png --window-size=1280,800 file://...`),
 publique com `$BIN/evidence.sh design <N> plan-$(date +%Y%m%d%H%M) <arquivos>` (se o config tiver
-`evidence_repo`) e use as linhas de imagem que ele imprime. **Nunca** cole na issue um link privado
-ou efêmero (artifact, arquivo local). Sem impacto visual: "No UI changes".
+`evidence_repo`) e use as linhas de imagem que ele imprime.
+
+**Design no Claude Design** (quando a ferramenta `Artifact` estiver disponível): `action:
+"quickstart"`, `intent: "design"`, e siga o que o resultado mandar. O nome do projeto de design
+**começa com o id da issue**: `title: "#<N> <título curto da issue>"` ao criar (se ele já existe com
+outro nome, numa retomada, renomeie). Exporte as telas como imagens (acima) e **ponha o link do
+artifact no plano** (`Design artifact: <url>` na seção "UX / UI"): só com as imagens o dev acaba
+redesenhando; com o link ele abre o artifact e reaproveita medidas, textos e assets prontos. O link
+não substitui spec e imagens, que são o que um humano vê na issue. Nunca cole caminho de arquivo
+local. Sem impacto visual: "No UI changes".
 
 ## 4. O plano (comentário na issue, no idioma `language` do config)
 
@@ -78,6 +86,7 @@ títulos podem ser traduzidos para o idioma do config):
 - Decisions taken without the maintainer, and why.
 
 ### UX / UI
+Design artifact: <URL of the "#<N> ..." design project, if one was made>
 Spec + images (or "No UI changes").
 
 ### Implementation
